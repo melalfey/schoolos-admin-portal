@@ -42,6 +42,9 @@ export const schoolService = {
   create: (data: any) => apiRequest<any>('/schools', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: any) => apiRequest<any>(`/schools/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) => apiRequest<any>(`/schools/${id}`, { method: 'DELETE' }),
+  getAdmins: (id: string) => apiRequest<any[]>(`/schools/${id}/admins`),
+  addAdmin: (id: string, email: string) => apiRequest<any>(`/schools/${id}/admins`, { method: 'POST', body: JSON.stringify({ email }) }),
+  removeAdmin: (id: string, userId: string) => apiRequest<any>(`/schools/${id}/admins/${userId}`, { method: 'DELETE' }),
 };
 
 // User Service

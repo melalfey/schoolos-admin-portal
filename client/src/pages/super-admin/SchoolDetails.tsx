@@ -4,7 +4,9 @@ import { schoolService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Users, GraduationCap, Building2, Settings, UserPlus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Users, GraduationCap, Building2, Settings, UserPlus, Trash2, Mail, MoreVertical, XCircle } from 'lucide-react';
+import { AssignAdminModal } from '@/components/AssignAdminModal';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
 
@@ -13,11 +15,13 @@ export default function SchoolDetails() {
   const id = params?.id;
   
   const [school, setSchool] = useState<any>(null);
+  const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
       fetchSchool();
+      fetchAdmins();
     }
   }, [id]);
 
@@ -29,6 +33,26 @@ export default function SchoolDetails() {
       toast.error("Failed to load school details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const data = await schoolService.getAdmins(id!);
+      setAdmins(data);
+    } catch (error) {
+      console.error("Failed to load admins", error);
+    }
+  };
+
+  const handleRemoveAdmin = async (userId: string) => {
+    if (!confirm("Are you sure you want to remove this admin?")) return;
+    try {
+      await schoolService.removeAdmin(id!, userId);
+      toast.success("Admin removed successfully");
+      fetchAdmins();
+    } catch (error) {
+      toast.error("Failed to remove admin");
     }
   };
 
@@ -148,15 +172,45 @@ export default function SchoolDetails() {
           <Card className="neu-flat border-none">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>School Administrators</CardTitle>
-              <Button className="bg-primary text-white shadow-neumorphic-sm">
-                <UserPlus className="mr-2 h-4 w-4" /> Assign Admin
-              </Button>
+              <AssignAdminModal schoolId={id!} onAdminAssigned={fetchAdmins} />
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p>No administrators assigned yet.</p>
-              </div>
+              {admins.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p>No administrators assigned yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {admins.map((admin) => (
+                    <div key={admin.id} className="flex items-center justify-between p-4 bg-white/50 rounded-lg border border-white/20 shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                            {admin.firstName?.[0] || admin.email[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-foreground">
+                            {admin.firstName} {admin.lastName}
+                          </p>
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Mail className="mr-1 h-3 w-3" /> {admin.email}
+                          </div>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => handleRemoveAdmin(admin.id)}
+                      >
+                        <XCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
