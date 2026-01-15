@@ -1,9 +1,16 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { SchoolList } from '@/components/SchoolList';
+import { AddSchoolModal } from '@/components/AddSchoolModal';
+import { useState } from 'react';
 import { LayoutDashboard, Users, School, Settings, LogOut } from 'lucide-react';
 
 export default function SuperAdminDashboard() {
   const { user, logout } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleSchoolAdded = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -57,9 +64,7 @@ export default function SuperAdminDashboard() {
             <button className="neu-btn px-4 py-2">
               Generate Report
             </button>
-            <button className="neu-btn px-4 py-2 bg-primary text-white hover:bg-primary/90">
-              Add New School
-            </button>
+            <AddSchoolModal onSchoolAdded={handleSchoolAdded} />
           </div>
         </header>
 
@@ -88,7 +93,7 @@ export default function SuperAdminDashboard() {
 
         {/* School List */}
         <div className="mb-8">
-          <SchoolList />
+          <SchoolList key={refreshKey} />
         </div>
 
         {/* Recent Activity */}
