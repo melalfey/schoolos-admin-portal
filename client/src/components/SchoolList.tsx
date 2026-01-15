@@ -16,7 +16,8 @@ import {
   DropdownMenuLabel, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Plus, School, Loader2 } from "lucide-react";
+import { MoreHorizontal, Plus, School, Loader2, ExternalLink } from "lucide-react";
+import { Link } from "wouter";
 import { schoolService } from "@/services/api";
 import { toast } from "sonner";
 
@@ -107,7 +108,11 @@ export function SchoolList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <Link href={`/super-admin/schools/${school.id}`}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <ExternalLink className="mr-2 h-4 w-4" /> View Details
+                          </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuItem>Edit Settings</DropdownMenuItem>
                         <DropdownMenuItem className="text-red-600">Deactivate</DropdownMenuItem>
                       </DropdownMenuContent>

@@ -10,6 +10,7 @@ import PrivateRoute from "./components/PrivateRoute";
 // Pages
 import Login from "./pages/Login";
 import SuperAdminDashboard from "./pages/super-admin/Dashboard";
+import SchoolDetails from "./pages/super-admin/SchoolDetails";
 import SchoolAdminDashboard from "./pages/school-admin/Dashboard";
 
 function Router() {
@@ -27,6 +28,12 @@ function Router() {
       <Route path="/super-admin/dashboard">
         <PrivateRoute requireSuperAdmin>
           <SuperAdminDashboard />
+        </PrivateRoute>
+      </Route>
+
+      <Route path="/super-admin/schools/:id">
+        <PrivateRoute requireSuperAdmin>
+          <SchoolDetails />
         </PrivateRoute>
       </Route>
 
