@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { SchoolList } from '@/components/SchoolList';
 import { LayoutDashboard, Users, School, Settings, LogOut } from 'lucide-react';
 
 export default function SuperAdminDashboard() {
@@ -83,6 +84,11 @@ export default function SuperAdminDashboard() {
           <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 pointer-events-none">
              <img src="/images/dashboard-hero.jpg" className="w-full h-full object-cover mask-image-linear-gradient" />
           </div>
+        </div>
+
+        {/* School List */}
+        <div className="mb-8">
+          <SchoolList />
         </div>
 
         {/* Recent Activity */}
