@@ -1,12 +1,12 @@
 import { toast } from 'sonner';
 
-const API_URL = 'http://142.93.190.119:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
-interface FetchOptions extends RequestInit {
-  token?: string;
+interface RequestOptions extends RequestInit {
+  headers?: Record<string, string>;
 }
 
-export async function apiRequest<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const token = localStorage.getItem('schoolos_token');
   
   const headers = {
@@ -24,16 +24,28 @@ export async function apiRequest<T>(endpoint: string, options: FetchOptions = {}
     const data = await response.json();
 
     if (!response.ok) {
+      // Handle 401 Unauthorized - redirect to login
+      if (response.status === 401) {
+        localStorage.removeItem('schoolos_token');
+        localStorage.removeItem('schoolos_user');
+        window.location.href = '/login';
+      }
       throw new Error(data.message || 'API request failed');
     }
 
-    return data.data as T;
+    return data.data || data; // Handle both wrapped { data: ... } and direct responses
   } catch (error: any) {
     console.error(`API Error (${endpoint}):`, error);
-    toast.error(error.message || 'Something went wrong');
     throw error;
   }
 }
+
+// Auth Service
+export const authService = {
+  login: (credentials: any) => apiRequest<any>('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
+  register: (data: any) => apiRequest<any>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+  getCurrentUser: () => apiRequest<any>('/auth/me'),
+};
 
 // School Service
 export const schoolService = {
@@ -50,7 +62,15 @@ export const schoolService = {
 // User Service
 export const userService = {
   getAll: (role?: string) => apiRequest<any[]>(`/users${role ? `?role=${role}` : ''}`),
-  create: (data: any) => apiRequest<any>('/users', { method: 'POST', body: JSON.stringify(data) }),
-  update: (id: string, data: any) => apiRequest<any>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  delete: (id: string) => apiRequest<any>(`/users/${id}`, { method: 'DELETE' }),
 };
+
+// Student Service
+export const studentService = {
+  getAll: (page = 1, limit = 10, search = '') => apiRequest<any>(`/students?page=${page}&limit=${limit}&search=${search}`),
+  getOne: (id: string) => apiRequest<any>(`/students/${id}`),
+  create: (data: any) => apiRequest<any>('/students', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: any) => apiRequest<any>(`/students/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) => apiRequest<any>(`/students/${id}`, { method: 'DELETE' }),
+};
+
+export default apiRequest;
