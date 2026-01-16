@@ -5,16 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, Loader2, MoreHorizontal, User } from 'lucide-react';
 import { AddStudentModal } from '@/components/AddStudentModal';
+import { EditStudentModal } from '@/components/EditStudentModal';
 import { studentService } from '@/services/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Trash2, Edit } from 'lucide-react';
 
 export default function Students() {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchStudents = async () => {
     try {
@@ -25,6 +29,23 @@ export default function Students() {
       toast.error("Failed to load students");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditClick = (student: any) => {
+    setSelectedStudent(student);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (student: any) => {
+    if (!confirm(`Are you sure you want to delete ${student.firstName} ${student.lastName}?`)) return;
+    
+    try {
+      await studentService.delete(student.id);
+      toast.success("Student deleted successfully");
+      fetchStudents();
+    } catch (error) {
+      toast.error("Failed to delete student");
     }
   };
 
@@ -110,9 +131,12 @@ export default function Students() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Unenroll</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClick(student)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeleteClick(student)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete Student
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -123,6 +147,13 @@ export default function Students() {
           )}
         </CardContent>
       </Card>
+
+      <EditStudentModal 
+        student={selectedStudent} 
+        open={isEditModalOpen} 
+        onOpenChange={setIsEditModalOpen} 
+        onStudentUpdated={fetchStudents} 
+      />
     </SchoolAdminLayout>
   );
 }

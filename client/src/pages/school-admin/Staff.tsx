@@ -5,16 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, Loader2, MoreHorizontal, User, Mail, Phone } from 'lucide-react';
 import { AddStaffModal } from '@/components/AddStaffModal';
+import { EditStaffModal } from '@/components/EditStaffModal';
 import { staffService } from '@/services/api';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Trash2, Edit } from 'lucide-react';
 
 export default function Staff() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedStaff, setSelectedStaff] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchStaff = async () => {
     try {
@@ -25,6 +29,23 @@ export default function Staff() {
       toast.error("Failed to load staff members");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditClick = (member: any) => {
+    setSelectedStaff(member);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = async (member: any) => {
+    if (!confirm(`Are you sure you want to remove ${member.firstName} ${member.lastName}?`)) return;
+    
+    try {
+      await staffService.delete(member.id);
+      toast.success("Staff member removed successfully");
+      fetchStaff();
+    } catch (error) {
+      toast.error("Failed to remove staff member");
     }
   };
 
@@ -117,9 +138,12 @@ export default function Staff() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Profile</DropdownMenuItem>
-                          <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Remove</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClick(member)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDeleteClick(member)}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -130,6 +154,13 @@ export default function Staff() {
           )}
         </CardContent>
       </Card>
+
+      <EditStaffModal 
+        staff={selectedStaff} 
+        open={isEditModalOpen} 
+        onOpenChange={setIsEditModalOpen} 
+        onStaffUpdated={fetchStaff} 
+      />
     </SchoolAdminLayout>
   );
 }

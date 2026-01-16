@@ -4,7 +4,22 @@ import { schoolService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Users, GraduationCap, Building2, Settings, UserPlus, Trash2, Mail, MoreVertical, XCircle } from 'lucide-react';
+import { ArrowLeft, Users, GraduationCap, Building2, Settings, UserPlus, Trash2, Mail, MoreVertical, XCircle, Save, AlertTriangle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useLocation } from 'wouter';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { AssignAdminModal } from '@/components/AssignAdminModal';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Link } from 'wouter';
@@ -13,8 +28,11 @@ import { toast } from 'sonner';
 export default function SchoolDetails() {
   const [, params] = useRoute('/super-admin/schools/:id');
   const id = params?.id;
+  const [, setLocation] = useLocation();
   
   const [school, setSchool] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ name: '', domain: '', slug: '', isActive: true });
+  const [isSaving, setIsSaving] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +47,12 @@ export default function SchoolDetails() {
     try {
       const data = await schoolService.getOne(id!);
       setSchool(data);
+      setEditForm({
+        name: data.name,
+        domain: data.domain || '',
+        slug: data.slug,
+        isActive: data.isActive
+      });
     } catch (error) {
       toast.error("Failed to load school details");
     } finally {
@@ -53,6 +77,29 @@ export default function SchoolDetails() {
       fetchAdmins();
     } catch (error) {
       toast.error("Failed to remove admin");
+    }
+  };
+
+  const handleUpdateSchool = async () => {
+    setIsSaving(true);
+    try {
+      await schoolService.update(id!, editForm);
+      toast.success("School updated successfully");
+      fetchSchool();
+    } catch (error) {
+      toast.error("Failed to update school");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteSchool = async () => {
+    try {
+      await schoolService.delete(id!);
+      toast.success("School deleted successfully");
+      setLocation('/super-admin/dashboard');
+    } catch (error) {
+      toast.error("Failed to delete school");
     }
   };
 
@@ -101,9 +148,29 @@ export default function SchoolDetails() {
             <Button variant="outline" className="neu-btn">
               <Settings className="mr-2 h-4 w-4" /> Settings
             </Button>
-            <Button variant="destructive" className="neu-btn-destructive">
-              <Trash2 className="mr-2 h-4 w-4" /> Delete School
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="neu-btn-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete School
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the school
+                    <span className="font-bold text-foreground"> {school.name} </span>
+                    and all associated data including students, staff, and records.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteSchool} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete School
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
@@ -218,10 +285,51 @@ export default function SchoolDetails() {
         <TabsContent value="settings">
           <Card className="neu-flat border-none">
             <CardHeader>
-              <CardTitle>School Settings</CardTitle>
+              <CardTitle>Edit School Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Configuration options coming soon.</p>
+              <div className="space-y-6 max-w-lg">
+                <div className="space-y-2">
+                  <Label>School Name</Label>
+                  <Input 
+                    value={editForm.name} 
+                    onChange={(e) => setEditForm({...editForm, name: e.target.value})} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Slug (URL Identifier)</Label>
+                  <Input 
+                    value={editForm.slug} 
+                    onChange={(e) => setEditForm({...editForm, slug: e.target.value})} 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Custom Domain</Label>
+                  <Input 
+                    value={editForm.domain} 
+                    onChange={(e) => setEditForm({...editForm, domain: e.target.value})} 
+                    placeholder="e.g. school.edu.eg"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div className="space-y-0.5">
+                    <Label>Active Status</Label>
+                    <p className="text-sm text-muted-foreground">Disable to block access</p>
+                  </div>
+                  <Switch 
+                    checked={editForm.isActive}
+                    onCheckedChange={(checked) => setEditForm({...editForm, isActive: checked})}
+                  />
+                </div>
+
+                <Button onClick={handleUpdateSchool} disabled={isSaving} className="w-full">
+                  <Save className="mr-2 h-4 w-4" />
+                  {isSaving ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
