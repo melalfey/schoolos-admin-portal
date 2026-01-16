@@ -13,6 +13,7 @@ import SuperAdminDashboard from "./pages/super-admin/Dashboard";
 import SchoolDetails from "./pages/super-admin/SchoolDetails";
 import SchoolAdminDashboard from "./pages/school-admin/Dashboard";
 import Students from "./pages/school-admin/Students";
+import Staff from "./pages/school-admin/Staff";
 
 function Router() {
   return (
@@ -48,6 +49,12 @@ function Router() {
       <Route path="/school-admin/students">
         <PrivateRoute requiredRoles={['school_admin']}>
           <Students />
+        </PrivateRoute>
+      </Route>
+
+      <Route path="/school-admin/staff">
+        <PrivateRoute requiredRoles={['school_admin']}>
+          <Staff />
         </PrivateRoute>
       </Route>
 
