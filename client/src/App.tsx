@@ -17,6 +17,7 @@ import Staff from "./pages/school-admin/Staff";
 import Classes from "./pages/school-admin/Classes";
 import Attendance from "./pages/school-admin/Attendance";
 import EmergencyDashboard from "./pages/school-admin/EmergencyDashboard";
+import Timetable from "./pages/school-admin/Timetable";
 
 function Router() {
   return (
@@ -76,6 +77,12 @@ function Router() {
       <Route path="/school-admin/emergency">
         <PrivateRoute requiredRoles={['school_admin']}>
           <EmergencyDashboard />
+        </PrivateRoute>
+      </Route>
+
+      <Route path="/school-admin/timetable">
+        <PrivateRoute requiredRoles={['school_admin']}>
+          <Timetable />
         </PrivateRoute>
       </Route>
 

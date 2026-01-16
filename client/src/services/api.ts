@@ -98,6 +98,17 @@ export const attendanceService = {
   create: (data: any) => apiRequest<any>('/attendance', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: any) => apiRequest<any>(`/attendance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   delete: (id: string) => apiRequest<any>(`/attendance/${id}`, { method: 'DELETE' }),
+  emergencyCheck: (data: any) => apiRequest<any>('/attendance/emergency-check', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// Schedule Service
+export const scheduleService = {
+  getAll: (params?: any) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest<any[]>(`/schedules?${query}`);
+  },
+  create: (data: any) => apiRequest<any>('/schedules', { method: 'POST', body: JSON.stringify(data) }),
+  delete: (id: string) => apiRequest<any>(`/schedules/${id}`, { method: 'DELETE' }),
 };
 
 export default apiRequest;
