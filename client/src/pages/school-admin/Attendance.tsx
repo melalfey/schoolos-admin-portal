@@ -74,8 +74,9 @@ export default function Attendance() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Student ID</TableHead>
-                  <TableHead>Class ID</TableHead>
+                  <TableHead>Details</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -83,13 +84,23 @@ export default function Attendance() {
                 {records.map((record) => (
                   <TableRow key={record.id}>
                     <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                        <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                            {record.type}
+                        </span>
+                    </TableCell>
                     <TableCell>{record.studentId}</TableCell>
-                    <TableCell>{record.classId}</TableCell>
+                    <TableCell>
+                        {record.type === 'LESSON' && <span className="text-xs text-muted-foreground">Period: {record.period}</span>}
+                        {record.type === 'ECA' && <span className="text-xs text-muted-foreground">Activity: {record.activityId}</span>}
+                        {record.isEmergencyCheck && <span className="text-xs text-red-600 font-bold ml-2">⚠️ EMERGENCY</span>}
+                    </TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        record.status === 'Present' ? 'bg-green-100 text-green-800' :
-                        record.status === 'Absent' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
+                        record.status === 'PRESENT' ? 'bg-green-100 text-green-800' :
+                        record.status === 'ABSENT' ? 'bg-red-100 text-red-800' :
+                        record.status === 'LATE' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-blue-100 text-blue-800'
                       }`}>
                         {record.status}
                       </span>
