@@ -10,6 +10,7 @@ export interface User {
   role: 'super_admin' | 'school_admin' | 'teacher' | 'student' | 'parent';
   isSuperAdmin: boolean;
   avatar?: string;
+  tenants?: { tenantId: string; role: string }[];
 }
 
 interface AuthContextType {
