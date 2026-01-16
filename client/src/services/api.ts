@@ -91,4 +91,13 @@ export const classService = {
   delete: (id: string) => apiRequest<any>(`/classes/${id}`, { method: 'DELETE' }),
 };
 
+// Attendance Service
+export const attendanceService = {
+  getAll: (page = 1, limit = 10, search = '') => apiRequest<any>(`/attendance?page=${page}&limit=${limit}&search=${search}`),
+  getOne: (id: string) => apiRequest<any>(`/attendance/${id}`),
+  create: (data: any) => apiRequest<any>('/attendance', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id: string, data: any) => apiRequest<any>(`/attendance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id: string) => apiRequest<any>(`/attendance/${id}`, { method: 'DELETE' }),
+};
+
 export default apiRequest;
