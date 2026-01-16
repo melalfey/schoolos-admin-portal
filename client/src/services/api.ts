@@ -111,4 +111,13 @@ export const scheduleService = {
   delete: (id: string) => apiRequest<any>(`/schedules/${id}`, { method: 'DELETE' }),
 };
 
+// Report Service
+export const reportService = {
+  getAttendanceStats: (params?: any) => {
+    const query = new URLSearchParams(params).toString();
+    return apiRequest<any[]>(`/reports/attendance-stats?${query}`);
+  },
+  getChronicAbsenteeism: () => apiRequest<any[]>('/reports/chronic-absenteeism'),
+};
+
 export default apiRequest;

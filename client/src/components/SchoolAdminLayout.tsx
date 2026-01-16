@@ -12,7 +12,8 @@ import {
   X,
   BookOpen,
   ClipboardCheck,
-  AlertTriangle
+  AlertTriangle,
+  BarChart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -34,6 +35,7 @@ export default function SchoolAdminLayout({ children }: SchoolAdminLayoutProps) 
     { icon: ClipboardCheck, label: 'Attendance', href: '/school-admin/attendance' },
     { icon: AlertTriangle, label: 'Emergency', href: '/school-admin/emergency' },
     { icon: Calendar, label: 'Timetable', href: '/school-admin/timetable' },
+    { icon: BarChart, label: 'Reports', href: '/school-admin/reports' },
     { icon: Settings, label: 'Settings', href: '/school-admin/settings' },
   ];
 
